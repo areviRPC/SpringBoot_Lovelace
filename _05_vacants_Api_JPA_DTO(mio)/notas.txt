@@ -1,0 +1,269 @@
+
+                                            JUEVES 26/04/2024
+
+> main/java/vacants/util 
+
+new folder dto
+
+esta carpeta sera hermana de enums y estara dividida en dos secciones 
+
+
+> > main/java/vacants/util/dto
+
+Creamos la carpeta request
+
+Creamos la carpeta response
+
+1.
+
+> main/java/vacants/util/dto/request
+
+creamos un archivo tipo request por cada entidad que usamos 
+
+creamos vacantRequest y companyRequest 
+
+estas una clase comun y corriente que contiene los atributos de cada entidad
+
+(los @)
+
+2. 
+
+> main/java/vacants/util/dto/request/VacantRequest.java
+
+El StateVacant tiene valores restringidos de forma que es un tipo de dato
+restringido 
+
+
+3.
+
+> main/java/vacants/util/dto/request/VacantResponse.java
+
+// Completar
+
+4.
+
+En lo que queremos mostrar de VacantResponse esta incluida "companyResponse"
+ya que queremos imprimir toda la informacion de la empresa
+
+5. 
+
+> main/java/com/riwi/vacants/repositories 
+
+Creamos los archivos VacantRepository y CompanyRepository las cuales usaran 
+@Repository y extenderan de JpaRepository que tiene como argumento el tipo de 
+entidad y Su tipo de dato en su atributo principal 
+
+> main/java/com/riwi/vacants/service
+
+creamos la carpeta interfaces
+
+6. 
+
+> main/java/com/riwi/vacants/service/interfaces
+
+Creamos el archivo CrudService.java que sera nuestra interfas y tendra como 
+argumentos los Request,los Response y el tipo de dato de la llave primaria
+
+7. 
+
+creamos el metodo delete que tendra como argumento un id de tipo generico
+
+8. 
+
+creamos el metodo create que recibe un dato tipo request generico
+
+9. 
+
+creamos el metodo update que debe recibir el ID generico y el RQ
+(reques) de tipo generico
+
+10.
+
+creamos el metodo 
+
+> main/java/com/riwi/vacants/service/interfaces
+
+creamos el archivo de interfaces de compañia y de vacante
+
+11. 
+
+Este metodo sera una interface que extiende de CrudService y tendra como 
+argumento companyRequest,companyResponse y el tipo de llave primaria (String)
+
+12. 
+
+> main/java/com/riwi/vacants/service
+
+Nuestro metodo CompanyService implementara ICompanyService que al darle click
+se inyectaran todos los metodos que diseñamos anterioremente
+
+adicional se debe usar 
+@service y @AllArgsContructor que construye un constructor ya que el 
+private final requiere inicializar el objeto desde el principio y que no este vacio 
+
+13. 
+
+Modificamos los metodos que necesitamos empezando por el getAll 
+
+
+    @Override // 13,
+    public Page<CompanyResponse> getAll(int page, int size) {
+     if (page < 0 ) {
+        page = 0;
+     }   
+     PageRequest pagination = PageRequest.of(page,size);
+
+     return this.companyRespository.findAll(pagination);
+    }
+
+14.
+
+metodo Company a metodo CompanyResponse  
+
+
+(Completar)
+
+15.
+Este metodo flecha recorre todas las compañias y las transforma en CompanyResponse
+Asignando los atributos de esta a cada objeto Company 
+
+> main/java/com/riwi/vacants
+
+creamos la carpeta controller
+
+> main/java/com/riwi/vacants/controller
+
+16. 
+El generico del generico 
+
+17. 
+
+> src/main/resources/application.properties
+
+server.servlet.context-path = /api/v1 
+
+para modificar toda la URL de la api por defecto
+
+                                            Lunes 29/04/2024
+
+
+> main/java/com/riwi/vacants/utils/response/VacantResponse.java
+
+notamos que se nos crea un bucle infinito. ¨por esto es necesario hacer un nuevo DTO que tenga VacantResponse pero sin la compañia 
+
+18.
+
+> main/java/com/riwi/vacants/utils/dto/response 
+
+Creamos el archivo VacantToCompanyResponse.java la cual se encargara de tener
+los atributos de VacantResponse pero sin incluir la compañia para evitar 
+el bucle. Este sera usado en CompanyResponse para retornar la lista de 
+vacantes 
+
+19. 20.
+
+> main/java/com/riwi/vacants/service/CompanyService.java
+
+Con el .Stream desarma el objeto que arroja setVacants que es una lista, 
+esto para usar el metodo .map 
+Luego para poder ordenar de nuevo los elementos usamos el metodo collect(Collectors.toList) 
+
+    private CompanyResponse entityToResponse(Company entity){
+        CompanyResponse response = new CompanyResponse(); 
+
+        BeanUtils.copyProperties(entity, response); //19 
+
+        response.setVacante(entity.getVacants().stream().map(vacant -> this.vacantToResponse(vacant)).collect(Collectors.toList()));
+        return response;
+    }
+
+De esta forma mapeamos con "getVacants" todas las vacantes de esa compañia 
+convirtiendo cada una de ellas al DTO de VacantToCompanyResponse
+Convirtinedo cada una de ellas en una coleccion para poder aplicar el metodo map
+
+
+En el inicio estamos mapeando con getAll todas las compañias
+Luego con el .map estamos abstrayendo todas las vacantes de las compañias
+
+
+21. 
+
+Vemos que el metodo create devuelve un company de tipo Request de modo que
+tambien debemos usar BeanUtils para convertir la request a una company
+
+    private Company requestToCompany(CompanyRequest request, Company company){
+        // Hacemos la copia de CompanyRequest
+        company.setContact(request.getContact());
+        company.setName(request.getName());
+        company.setLocation(request.getLocation());
+        company.setVacants(new ArrayList<>()); #####
+
+
+
+        BeanUtils.copyProperties(request, company);
+        return company;
+    }
+
+Esto es lo que hace el BeanUtils pero resumido
+la linea 
+
+    company.setVacants(new ArrayList<>()); #####
+
+es necesaria sin importar como lo hagamos 
+
+22. 
+Dsarrollamos el metodo create 
+
+El repositorio devuelve una compañia pero le estamos pidieidno retornar
+un request por esto necesitamos nuevamente usar el entityToResponse
+
+  @Override
+    public CompanyResponse create(CompanyRequest request) { 
+        
+        Company company = this.requestToCompany(request, new Company());
+    
+        return this.entityToResponse(companyRespository.save(company));
+    }
+
+23.
+
+usamos el metodo @PostMapping para crear con @RequesBody una compañia
+reocrdar que debemos usar el CompanyService y sus atributos para crear 
+
+
+> PostMan 
+
+los atributos que tiene CompanyRequest son name,location,contact estos seran
+los mismso atributos que deberemos insertar en el JSON del body para la peticion
+
+No asignamos ninguna URL especial asi que no es necesario cambiar la URL
+
+24.
+
+> main/java/com/riwi/vacants/service/interface/ICompanyService.java
+
+debemos crear el metodo getById para usarlo en el servicio 
+
+25. 
+
+> main/java/com/riwi/vacants/service/CompanyService.java
+
+usamos el metodo find para comprobar si el id que buscamos existe, sino 
+arroja un error
+
+justo arriba usamos @Override para modificar el metodo getById donde usamos
+el metodo find y retornamos un CompanyResponse con sus caracteristicas 
+
+26.
+
+> main/java/com/riwi/vacants/controllers/CompanyController.java
+
+Asignamos el metodo getById con @GetMapping("/{id}") ya que no es posible que 
+existan dos GetMapping en una entidad. Aqui usamos el path variable que corresponda al ID
+
+> PostMan 
+
+hacemos una nueva request en la que en la URL usamos el id que queremos buscar.
+
+    http://localhost:8080/api/v1/company/111111 
+

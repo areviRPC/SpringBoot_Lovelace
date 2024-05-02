@@ -1,0 +1,254 @@
+
+
+> src/main/resources/ application.properties
+
+Creamos la conexion y establecemos el uso de la base de datos pegando el archivo
+que esta en nuestra carpeta de drive
+
+Esta vez la conexion es remota desde clever por lo que usamos las credenciales
+propias 
+
+> src/main/java/com/riwi/products
+
+creamos todas las carpetas (entities,services,repositori,controller)
+
+> src/main/java/com/riwi/products/entities
+
+creamos nuestra primera clase. 
+
+usamos la etiqueta @Entity (name = "product") en la que podemos asignar
+el nombre a la tabla que usare de manera autoamtica
+
+adicional usamos las siguientes etiquetas fuera de la entidad
+
+
+    @Data : crea getter y selects junto con toString() 
+    @AllArgsConstructor : crea Constructor lleno
+    @NoArgsConstructor : crea constructor vacio 
+
+junto con esto dentro de la entidad usamos las etiquetas
+ 
+    @Id:
+    Que define el primer atributo como Id
+
+    @GeneratedValue (strategy = GenerationType.IDENTITY):
+    que define el primer atributo como llave primaria auto incrementable
+
+
+> src/main/java/com/riwi/products/repositories
+
+Creamos nuestro primer repositorio con las siguientes caracteristicas
+
+donde
+@Repository declara el objeto como repositorio
+
+@Repository
+public interface PorductoRepository extends JpaRepository<Products, Long> {
+
+    public List<Products> findByName(String name);
+    
+}
+
+este metodo estara declarado como interface y extiende de JpaRepository
+Se le ingresa ----- y contiene un metodo in
+
+esta contiene un metodo interno "findByName" que viene por defecto y puede
+reotrnar una List de productos recibiendo por atributo el String "name" que 
+fue como le pusimos a la tabla
+
+
+    EL SERVICIO Y EL CONTROLLER SIEMPRE DEBERIAN SER INTERFACES 
+
+> src/main/java/com/riwi/products/services/productService
+
+Todos los metodos HTTP estan establecidos en el archivo IproductService como
+atributos de esta entiedad que se establecio como interface de modo que podemos
+extenderla y usarla en ProductController 
+
+final es una manera de instanciar product repository. 
+Esto significa que objRepository es estatico por lo que lo inicializamos 
+con la etiqueta @allString al inicio 
+
+> src/main/java/com/riwi/products/services 
+
+creamos una relacion entre productService y IproductService integrando los 
+metodos faltantes de manera automatica 
+
+usamos la etiqueta 
+@Autowired : para que spring entienda la inyeccion de dependencia 
+
+en la parte superior del metodo principal usamos 
+@Service
+@AllArgsConstructor 
+
+Para generar los contrcutores y getter 
+
+
+    @Override
+    public List<Products> getAll() {
+        return this.objPorductoRepository.findAll();
+    }
+
+Modifcamos el metodo getAll para que retorne nuestro objeto usando los
+metodos de IproductService que son los que ya tenemos 
+
+> src/main/java/com/riwi/products/controller
+
+
+
+creamos el controlador de productos 
+extendiendo desde IproductService para usar sus metodos 
+
+> Postman
+
+Una vez ejercutado el metodo findAll como una extension
+
+
+                     MARTES 23 / 4 / 2024
+
+
+> src/main/java/com/riwi/products/Service/productService
+
+Creamos el metodo save extendido de IproductService con el implements
+
+> src/main/java/com/riwi/products/controller/ProductController
+
+Creamos el metodo insert con el Postmaping 
+
+    @PostMapping
+    public ResponseEntity<Products> insert(
+        @RequestBody Products objProducts
+    ){
+        return ResponseEntity.ok(this.objIProductService.save(objProducts));  // Repsonse entity 
+    }
+donde: 
+
+-ResponseEntity es una entidad global del paquete de JAVA que nos permite 
+manipular objetos de tipo producto
+- @RequestBody que nos permite ingresar datos en el Postman
+- metodo ok() que al ser ResponseEntity una entidad de JAVA debemos verificar
+que todo salga bien (estatus 200) al correr el codigo
+- Metodo save que crea y actualiza objetos autoamticamente
+
+
+
+> Postman
+
+Hacemos una nueva peticion esta vez con el metodo POST. 
+Para insertar los nuevos datos debemos ir al Body e incertar los datos en 
+row en formato JSON en el mismo orden que estan en la entidad product 
+
+
+1.
+
+> src/main/java/com/riwi/products/Service/productService
+
+desarrollamos el metodo getById usando el orElseTrow para asegurarnos
+que al ingresar un id este si exista 
+
+> src/main/java/com/riwi/products/controller/ProductController
+
+    @GetMapping(path = "/{id}") 
+    public ResponseEntity<Products> get(@PathVariable Long id){
+        return ResponseEntity.ok(this.objIProductService.getById(id)) ;
+    }
+
+Creamos el meodo get con @GetMapping para asignar una ruta dinamica usando
+@PathVariable 
+
+Se retorna el metodo dentro de ResponseEntity.ok que arroja un status 200 
+gatantizando que todo este bien 
+
+> Postman
+
+Creamos una nueva peticion con el metodo GET insertando el id al final de
+la URl como lo programamos en @GetMapping 
+
+1.1 
+
+> Postman
+
+2.
+
+> src/main/java/com/riwi/products/Service/productService
+
+desarrollamos el metodo update con el metodo save que de manera inteligente reconoce si el id 
+ingresado existe y lo actualiza 
+
+> src/main/java/com/riwi/products/controller/ProductController
+
+Creamos el metodo update Con la etiqueta @PutMapping que lo identifica como
+un metodo para actualizar datos 
+
+   @PutMapping(path = "/{id}")
+    public ResponseEntity<Products> update(@RequestBody Products objProducts,@PathVariable Long id){
+        objProducts.setId(id);
+        return ResponseEntity.ok(this.objIProductService.update(objProducts));
+    }
+
+Dentro de los parametros del update tendremos:
+@RequestBody: para obtener los datos actualziados
+@PathVariable  Para obetener: el Id dinamico ingresado en la URL 
+
+> Postman
+
+Creamos la nueva peticion para el actualizar 
+modificamos la URL del metodo GET para que se imprima el 
+ultimo usuario actualizado una vez lo hagamos
+
+http://localhost:8080/api/v1/products/{{id}}
+
+aparte
+Debemos ir al apartado de Test e insertar dos lineas de codigo necesarias
+para insertar el id inmediatamente despues de actualizar un dato  
+
+    var response = pm.response.json(); 
+
+    pm.collectionVariables.set("id",response.id); 
+
+esto guarda la variable "id" (debe tener el mismo nomrbe que el atributo 
+en el entidad) para ser usado en el link
+
+en el apartado Body en row JSON ingresamos los datos que vamos a actualizar
+en el mismo orden en el que creamos la entidad
+
+3.
+
+El metodo delete en este caso no retorna un booleano sino un void, osea 
+no la confirmacion de eliminar sino un nuevo tipo de dato vacio
+ 
+> src/main/java/com/riwi/products/Service/productService
+
+desarrollamos el metodo delete que ejecuta el metodo findById que 
+es usado como parametro en el delete. Al mismo tiempo el orElseThrow 
+verifica que el id exista de lo contrario la funcion findById no se ejecuta
+
+    @Override 
+    public void delete(Long id) {
+        Products producto = this.objPorductoRepository.findById(id).orElseThrow();
+    
+        this.objPorductoRepository.delete(producto);
+    }   
+
+> src/main/java/com/riwi/products/controller/ProductController
+
+Creamos el metodo delete con la etiqueta @DeleteMapping aginando una ruta
+dinamica al URL 
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Void> delete( @PathVariable Long id) {
+        this.objIProductService.delete(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+Se usa la Clase reservada Void que le dice al ResponseEntity que no se va 
+a retornar contenido
+
+retornamos el ResponseEntity.noContent() que responde un objeto vacio 
+para finalizar podemos usar el build() para declarar esta nueva clase eliminada
+
+> Postman
+
+El URl en este caso tambien es dinamico asi que se puede ingresar o se asigna
+el id del ultimo ojeto creado o actualizado
