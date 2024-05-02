@@ -1,0 +1,80 @@
+
+> main / java-com-riwi-operations 
+
+Creamos la carpetra controller y creamos el primer controlador
+
+
+@RestController
+Esta etiqueta es para indicar a spring que la clase es un controlador
+
+@RequestMapping("/api/v1/greet")
+La ruta en el RequestMapping nos indica la version de la api a desarrollar
+
+> PostMan 
+
+Este recruso sera donde corramos nuestro codigo y probaremos la funcionalidad
+
+accedemos a nuestra cuenta y creamos en una nueva colleccion a la que le 
+pondremos el nombre de nuestro proyecto. En ella podemos generar todos los metodos 
+http para hacer las pruebas necesarias
+
+usamos siempre la funcion addRequest
+
+> main / java-com-riwi-operations 
+
+Creamos la carpeta entities y el archivo Operation.java para declarar 
+los atributos y los gettes/setters 
+
+> main / java-com-riwi-operations / controller
+
+creamos el operation controller donde asignamos el 
+@ RestController para declararlo como controlador 
+y el 
+@ RequestMapping para asignar la ruta donde se va a ejecutar
+
+declaramos un metodo dentro de la clase que llamaremos "sum"
+Este metodo ira acompañado del @ PostMapping para declarar la ruta
+y tendra la sintaxis 
+
+    @PostMapping
+    public String sum(@RequestBody Operation objOperation){
+
+        int num1 = objOperation.getNum1();
+        int num2 = objOperation.getNum2();
+
+        return num1 + "+" + num2 + "=" + (num1+num2);
+    }
+
+
+En donde usamos la etiqueta @ RequestBody para que el codigo reconozca 
+de donde se van a ingresar los datos.
+Se aplica la logica necesaria y se retorna el resultado con el formato deseado
+
+> PostMan
+
+Volvemos para crear una nueva request para ejecutar el metodo
+
+como usamos la etiqueta @ RequestBody debemos ir al apartado "Body" y asignar los 
+valores a num1 y num2. Seleccionamos la opcion "raw" con formato "JSON" 
+(incluido en el formato @RequestBody) en donde podemos enviarle nuestros dos numeros
+en formato JSON 
+
+Para este metodo se ejecuta el metodo POST 
+
+> main / java-com-riwi-operations / controller
+
+Creamos otros metodos dentro de nuestro metodo principal en el cual gracias
+al uso de @PostMapping podemos asignar una subruta a cada metodo para 
+poder ejecutarla en el PostMan sin afectar el resto de metodos 
+
+    @PostMapping("/rest")
+    public String rest(@RequestBody Operation objOperation){
+
+        int num1 = objOperation.getNum1();
+        int num2 = objOperation.getNum2();
+
+        return num1 + "-" + num2 + "=" + (num1-num2);
+    }
+
+usando la ruta {{URL}}/operations/compara en la peticion al PostMan 
+para especificar el metodo a utulizar 
