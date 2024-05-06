@@ -1,0 +1,100 @@
+
+
+                                                6 de mayo 2024
+
+
+>> MySQL 
+
+crear la base de datos
+
+1. 
+
+src>main>resources 
+
+configurar la base de de datos  
+
+2.
+src>main>java>com>riwi>beautySalon>domain>entities 
+
+creamos la entidad ServiceEntity con la etiqueta @Entity que lo define como tal
+y crea la entidad con el nombre que le damos 
+
+tipo de dato BigDecimal para manejar numeros grandes 
+
+etiquetas @Data @Builder @AllArgsConstructor y @NoArgsConstructor para construir
+los get y set de la entidad
+
+etiqueta @Id @GeneratedValue para definir la llave primaria
+
+2.1
+
+@Colum para definir el tamaño del texto
+@Lob para definir un espacio com otipo 
+
+3.
+
+src>main>java>com>riwi>beautySalon>domain>entities
+
+creamos la entidad Employee con sus caracteristicas incluyendo los 
+
+3.1
+
+src>main>java>com>riwi>beautySalon>utils>enums
+
+Creamos la dinamica del enum para el atributo roll
+
+src>main>java>com>riwi>beautySalon>domain>entities 
+
+4. 
+
+src>main>java>com>riwi>beautySalon>domain>entities 
+
+Crear entidad cliente 
+
+
+
+5. 
+
+src>main>java>com>riwi>beautySalon>domain>entities 
+
+crear la entidad cita 
+
+5.1 con las etiquetas @ManyToOne y @JoinColumn establecemos la relacion
+entre las entidades 
+aqyu establecemos relacion entre la cita y el cliente,el servicio y el empleado
+donde se reconoce la entidad 
+
+6.
+
+src>main>java>com>riwi>beautySalon>domain>entities>ClientEntity.java
+
+Creamos la relacion entre el cliente y las citas que tenga por medio 
+de una caracteristica de la entidad 
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "client",
+        cascade = CascadeType.ALL,
+        orphanRemoval = false
+        )
+    private List<Appointment> appoinments;
+
+Donde : 
+@ToString.Exclude = impide que se cree un bucle en la impresion
+@EqualsAndHashCode = no crea el espacio de memoria nuevamente
+
+y 
+
+@OneToMany(
+        fetch = FetchType.EAGER = para que venga con el JOIN explicito
+        mappedBy = "client", = le da nombre a la llave
+        cascade = CascadeType.ALL = Se trata como undelete cascade
+        orphanRemoval = false
+)
+
+7. 
+
+src>main>java>com>riwi>beautySalon>domain>entities>Employee.java
+
